@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#B5202C" />
+  <title>Borrowed / Returned Items Tracker</title>
+  <style>
+    :root{
+      --brand:#B5202C;
+      --brand-dark:#83151F;
+      --brand-soft:#FFF2F3;
+      --ink:#202124;
+      --muted:#6E737A;
+      --line:#E8E9EB;
+      --bg:#F6F7F9;
+      --card:#FFFFFF;
+      --success:#16814A;
+      --success-soft:#EAF8F0;
+      --warning:#A55F00;
+      --warning-soft:#FFF5E2;
+      --danger:#B42318;
+      --danger-soft:#FFF0EE;
+      --shadow:0 10px 28px rgba(36, 38, 44, .07);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height:100vh;
+      padding-bottom:90px;
+    }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:1180px;margin:0 auto;padding:18px 16px 32px}
+
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin:4px 0 18px;
+    }
+    .brand{display:flex;align-items:center;gap:11px;min-width:0}
+    .brand-mark{
+      width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      display:grid;place-items:center;box-shadow:0 8px 18px rgba(181,32,44,.25);flex:none;
+    }
+    .brand-mark svg{width:24px;height:24px;stroke:#fff}
+    .brand h1{font-size:18px;line-height:1.2;margin:0;font-weight:800;letter-spacing:-.02em}
+    .brand p{font-size:12px;color:var(--muted);margin:3px 0 0}
+
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .icon-btn,.ghost-btn,.primary-btn,.danger-btn,.soft-btn{
+      min-height:42px;border:0;border-radius:12px;padding:0 14px;font-weight:700;transition:.18s ease;
+    }
+    .icon-btn{width:42px;padding:0;background:#fff;border:1px solid var(--line);display:grid;place-items:center}
+    .icon-btn:hover,.ghost-btn:hover{background:#F1F2F4}
+    .icon-btn svg{width:19px;height:19px;stroke:var(--ink)}
+    .primary-btn{color:white;background:var(--brand);box-shadow:0 8px 16px rgba(181,32,44,.2)}
+    .primary-btn:hover{background:var(--brand-dark);transform:translateY(-1px)}
+    .ghost-btn{background:#fff;border:1px solid var(--line);color:var(--ink)}
+    .soft-btn{background:var(--brand-soft);color:var(--brand-dark)}
+    .danger-btn{background:var(--danger-soft);color:var(--danger)}
+    .small-btn{min-height:34px;border-radius:10px;padding:0 10px;font-size:12px}
+
+    .hero{
+      border-radius:24px;padding:22px;background:linear-gradient(128deg,#BC2632 0%,#8F1722 100%);color:#fff;
+      overflow:hidden;position:relative;box-shadow:0 14px 30px rgba(134,22,32,.2);
+    }
+    .hero:after{content:"";position:absolute;width:260px;height:260px;border:36px solid rgba(255,255,255,.08);border-radius:50%;right:-115px;top:-150px}
+    .hero:before{content:"";position:absolute;width:150px;height:150px;border:25px solid rgba(255,255,255,.07);border-radius:50%;right:110px;bottom:-120px}
+    .hero-content{position:relative;z-index:1;display:flex;justify-content:space-between;gap:20px;align-items:end}
+    .hero h2{font-size:24px;line-height:1.12;letter-spacing:-.04em;margin:0 0 8px;max-width:530px}
+    .hero p{margin:0;color:rgba(255,255,255,.82);font-size:14px;max-width:560px;line-height:1.5}
+    .hero .primary-btn{background:#fff;color:var(--brand-dark);box-shadow:none;white-space:nowrap}
+    .hero .primary-btn:hover{background:#FFEDEF}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+    .stat-card{background:var(--card);border:1px solid rgba(230,232,235,.9);box-shadow:var(--shadow);border-radius:var(--radius);padding:15px;min-width:0}
+    .stat-label{font-size:12px;color:var(--muted);font-weight:700;display:flex;gap:7px;align-items:center}
+    .stat-label span{display:grid;place-items:center;width:24px;height:24px;border-radius:8px;background:var(--brand-soft);color:var(--brand)}
+    .stat-label svg{width:15px;height:15px;stroke:currentColor}
+    .stat-number{font-size:27px;line-height:1;font-weight:850;letter-spacing:-.05em;margin-top:11px}
+    .stat-note{font-size:11px;color:var(--muted);margin-top:7px}
+
+    .toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:18px 0 12px}
+    .toolbar-left,.toolbar-right{display:flex;gap:10px;align-items:center;min-width:0}
+    .search-wrap{position:relative;min-width:250px;flex:1}
+    .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;stroke:var(--muted)}
+    .search-wrap input,.filter-select{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;outline:none;color:var(--ink)}
+    .search-wrap input{padding:0 14px 0 39px}
+    .search-wrap input:focus,.filter-select:focus,.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(181,32,44,.11)}
+    .filter-select{padding:0 34px 0 12px;min-width:145px}
+
+    .record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .record-card{background:var(--card);border:1px solid rgba(230,232,235,.9);box-shadow:var(--shadow);border-radius:var(--radius);padding:16px;transition:.18s ease}
+    .record-card:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(36,38,44,.1)}
+    .record-head{display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+    .record-event{font-size:15px;line-height:1.25;font-weight:800;margin:0;letter-spacing:-.015em}
+    .record-id{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px}
+    .status-pill{display:inline-flex;align-items:center;white-space:nowrap;font-size:11px;font-weight:800;border-radius:999px;padding:6px 9px}
+    .status-out{background:var(--warning-soft);color:var(--warning)}
+    .status-returned{background:var(--success-soft);color:var(--success)}
+    .status-overdue{background:var(--danger-soft);color:var(--danger)}
+    .status-partial{background:#EEF4FF;color:#2556A9}
+
+    .record-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 13px;padding:12px;background:#FAFAFB;border-radius:13px}
+    .meta-label{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+    .meta-value{font-size:13px;font-weight:750;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .items-preview{border-top:1px solid var(--line);padding-top:12px}
+    .items-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .items-label{font-size:12px;font-weight:800}
+    .item-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .item-chip{font-size:11px;font-weight:700;background:#F3F4F6;padding:6px 8px;border-radius:8px;white-space:nowrap}
+    .record-footer{margin-top:14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .due-text{font-size:11px;color:var(--muted);font-weight:650}
+    .record-actions{display:flex;gap:7px}
+
+    .empty{padding:54px 22px;background:#fff;border:1px dashed #D7D9DE;border-radius:var(--radius);text-align:center;color:var(--muted)}
+    .empty-icon{width:52px;height:52px;border-radius:16px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;margin:0 auto 12px}
+    .empty-icon svg{width:25px;height:25px;stroke:currentColor}
+    .empty h3{margin:0 0 7px;color:var(--ink);font-size:16px}
+    .empty p{margin:0 auto 14px;max-width:430px;font-size:13px;line-height:1.5}
+
+    .fab{position:fixed;right:18px;bottom:18px;border:0;border-radius:17px;padding:0 17px;height:54px;background:var(--brand);color:#fff;font-weight:800;display:flex;gap:8px;align-items:center;box-shadow:0 12px 24px rgba(181,32,44,.28);z-index:12}
+    .fab svg{width:18px;height:18px;stroke:currentColor}
+
+    .modal-backdrop{position:fixed;inset:0;background:rgba(17,19,23,.45);display:none;align-items:end;justify-content:center;z-index:30;padding:0}
+    .modal-backdrop.open{display:flex}
+    .modal{width:min(760px,100%);max-height:94vh;background:#fff;border-radius:24px 24px 0 0;overflow:auto;animation:slideIn .22s ease both}
+    @keyframes slideIn{from{transform:translateY(26px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-header{position:sticky;top:0;background:#fff;z-index:2;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:18px 18px 15px}
+    .modal-title{font-size:18px;margin:0;letter-spacing:-.025em}
+    .modal-body{padding:18px}
+    .modal-footer{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:13px 18px;display:flex;justify-content:flex-end;gap:9px}
+    .close-x{border:0;width:36px;height:36px;border-radius:10px;background:#F3F4F6;display:grid;place-items:center}
+    .close-x svg{width:18px;height:18px;stroke:var(--ink)}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+    .field{min-width:0}
+    .field.full{grid-column:1/-1}
+    .field label{font-size:12px;font-weight:800;display:block;margin:0 0 7px}
+    .field input,.field textarea,.field select{width:100%;border-radius:11px;border:1px solid var(--line);outline:none;padding:11px 12px;background:#fff;color:var(--ink)}
+    .field textarea{min-height:82px;resize:vertical;line-height:1.45}
+    .req{color:var(--brand)}
+    .section-label{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px}
+    .section-label h3{font-size:14px;margin:0;letter-spacing:-.01em}
+    .section-label span{font-size:11px;color:var(--muted)}
+    .item-row{display:grid;grid-template-columns:minmax(0,1fr)80px minmax(0,.8fr)40px;gap:8px;align-items:end;padding:10px;background:#FAFAFB;border:1px solid #EFF0F2;border-radius:13px;margin-bottom:8px}
+    .item-row .field label{font-size:10px;margin-bottom:5px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+    .item-row .field input{padding:9px 10px;font-size:13px}
+    .remove-item{height:38px;width:40px;border:0;border-radius:10px;background:var(--danger-soft);color:var(--danger);display:grid;place-items:center}
+    .remove-item svg{width:17px;height:17px;stroke:currentColor}
+
+    .detail-heading{display:flex;justify-content:space-between;gap:15px;align-items:flex-start;margin-bottom:16px}
+    .detail-heading h3{margin:0;font-size:20px;letter-spacing:-.035em}
+    .detail-sub{font-size:12px;color:var(--muted);font-weight:700;margin-top:5px}
+    .detail-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:17px}
+    .info-box{background:#FAFAFB;border-radius:13px;padding:12px}
+    .info-box .meta-value{white-space:normal;overflow:visible}
+    .return-list{display:flex;flex-direction:column;gap:9px}
+    .return-row{display:grid;grid-template-columns:minmax(0,1fr)90px;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:13px}
+    .return-item-name{font-size:13px;font-weight:800}
+    .return-item-sub{font-size:11px;color:var(--muted);margin-top:3px}
+    .return-row input{width:100%;border-radius:9px;border:1px solid var(--line);padding:8px 9px;text-align:center;outline:none}
+    .return-row input:focus{border-color:var(--brand)}
+    .notes-box{margin-top:16px;padding:12px;border-radius:13px;background:#FAFAFB;font-size:13px;line-height:1.5;color:#43474D}
+    .notes-box strong{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
+    .detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+    .danger-zone{margin-top:20px;padding-top:17px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+
+    .toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,12px);background:#1E2024;color:#fff;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s ease;z-index:40;box-shadow:0 10px 22px rgba(0,0,0,.2);max-width:calc(100vw - 32px);text-align:center}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .muted{color:var(--muted)}
+
+    @media (max-width:760px){
+      .app{padding:14px 13px 30px}
+      .header-actions .ghost-btn{display:none}
+      .hero{padding:20px 18px;border-radius:20px}
+      .hero-content{display:block}
+      .hero h2{font-size:22px;max-width:310px}
+      .hero .primary-btn{margin-top:15px;width:100%}
+      .stat-grid{grid-template-columns:repeat(2,1fr);gap:9px;margin:12px 0}
+      .stat-card{padding:13px}
+      .stat-number{font-size:24px}
+      .toolbar{align-items:stretch;display:block}
+      .toolbar-left{display:block}
+      .toolbar-right{margin-top:9px;display:grid;grid-template-columns:1fr 1fr}
+      .search-wrap{min-width:0}
+      .filter-select{min-width:0}
+      .record-grid{grid-template-columns:1fr;gap:10px}
+      .modal-body{padding:16px}
+      .form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .item-row{grid-template-columns:minmax(0,1fr)72px 38px}
+      .item-row .condition-field{display:none}
+      .detail-info{grid-template-columns:1fr 1fr;gap:8px}
+      .modal-footer{padding:12px 16px}
+      .modal-footer .ghost-btn,.modal-footer .primary-btn{flex:1}
+    }
+    @media (max-width:390px){
+      .brand h1{font-size:16px}.brand p{font-size:11px}
+      .topbar{gap:8px}.header-actions{gap:6px}
+      .icon-btn{width:39px;height:39px}.brand-mark{width:39px;height:39px}
+      .record-meta{gap:7px;padding:10px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M7 7h10l1 13H6L7 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/><path d="M9 12h.01M15 12h.01"/></svg>
+        </div>
+        <div>
+          <h1>Item Tracker</h1>
+          <p>Borrowed / Returned for events</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-btn small-btn" id="exportBtn" title="Download CSV report">Export CSV</button>
+        <button class="icon-btn" id="clearFiltersBtn" title="Clear search and filters" aria-label="Clear filters">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M6 6l1 14h10l1-14M9 10v6M15 10v6M10 6V4h4v2"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <h2>Alam agad kung nasaan ang gamit mo.</h2>
+          <p>Track who borrowed each item, which event it belongs to, and what still needs to be returned after setup or egress.</p>
+        </div>
+        <button class="primary-btn" id="openAddHero">+ Add borrowed items</button>
+      </div>
+    </section>
+
+    <section class="stat-grid" aria-label="Summary">
+      <div class="stat-card">
+        <div class="stat-label"><span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 7h18M7 3v4M17 3v4M5 11h14v9H5z"/></svg></span> Active records</div>
+        <div class="stat-number" id="statActive">0</div>
+        <div class="stat-note">Not fully returned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M7 8h10M7 12h6M5 4h14v16H5z"/></svg></span> Items out</div>
+        <div class="stat-number" id="statItemsOut">0</div>
+        <div class="stat-note">Still with borrower</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span> Overdue</div>
+        <div class="stat-number" id="statOverdue">0</div>
+        <div class="stat-note">Past expected return</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><span><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg></span> Returned</div>
+        <div class="stat-number" id="statReturned">0</div>
+        <div class="stat-note">Completed records</div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <input id="searchInput" type="search" placeholder="Search event, borrower, or item..." autocomplete="off" />
+        </div>
+      </div>
+      <div class="toolbar-right">
+        <select class="filter-select" id="statusFilter" aria-label="Filter by status">
+          <option value="all">All status</option>
+          <option value="out">Currently out</option>
+          <option value="partial">Partially returned</option>
+          <option value="overdue">Overdue</option>
+          <option value="returned">Returned</option>
+        </select>
+        <select class="filter-select" id="sortSelect" aria-label="Sort records">
+          <option value="newest">Newest first</option>
+          <option value="due">Return date</option>
+          <option value="event">Event A–Z</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="recordsArea" aria-live="polite"></section>
+  </main>
+
+  <button class="fab" id="openAddFab"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add record</button>
+
+  <div class="modal-backdrop" id="formModal" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h2 class="modal-title" id="formModalTitle">Add borrowed items</h2>
+        <button class="close-x" data-close="formModal" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <form id="recordForm">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="eventName">Event / Project <span class="req">*</span></label>
+              <input id="eventName" name="eventName" placeholder="e.g. Company Year-End Party" required />
+            </div>
+            <div class="field">
+              <label for="location">Location / Venue</label>
+              <input id="location" name="location" placeholder="e.g. Solaire, Pasay" />
+            </div>
+            <div class="field">
+              <label for="borrower">Borrowed by <span class="req">*</span></label>
+              <input id="borrower" name="borrower" placeholder="Name of person / team" required />
+            </div>
+            <div class="field">
+              <label for="borrowerContact">Contact number</label>
+              <input id="borrowerContact" name="borrowerContact" type="tel" inputmode="tel" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="dateBorrowed">Date borrowed <span class="req">*</span></label>
+              <input id="dateBorrowed" name="dateBorrowed" type="date" required />
+            </div>
+            <div class="field">
+              <label for="dueDate">Expected return</label>
+              <input id="dueDate" name="dueDate" type="date" />
+            </div>
+          </div>
+
+          <div class="section-label">
+            <h3>Items borrowed <span class="req">*</span></h3>
+            <button type="button" class="soft-btn small-btn" id="addItemBtn">+ Add item</button>
+          </div>
+          <div id="itemRows"></div>
+
+          <div class="field full" style="margin-top:14px">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Condition before borrowing, missing accessories, special reminder, etc."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="ghost-btn" data-close="formModal">Cancel</button>
+          <button type="submit" class="primary-btn">Save record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailModalTitle">
+    <div class="modal" role="document">
+      <div class="modal-header">
+        <h2 class="modal-title" id="detailModalTitle">Record details</h2>
+        <button class="close-x" data-close="detailModal" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="detailContent"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'borrowedReturnedTracker.v1';
+    let records = [];
+    let activeRecordId = null;
+    let toastTimer = null;
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const safe = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const uid = () => `REC-${Date.now().toString().slice(-7)}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;
+
+    function loadRecords(){
+      try { records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch(e){ records = []; }
+    }
+    function saveRecords(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+
+    function normalizeDate(date){
+      if(!date) return '';
+      const d = new Date(`${date}T00:00:00`);
+      return isNaN(d) ? '' : d.toLocaleDateString('en-PH', {month:'short', day:'numeric', year:'numeric'});
+    }
+    function getStatus(record){
+      const total = record.items.reduce((n,i)=>n+Number(i.qty||0),0);
+      const returned = record.items.reduce((n,i)=>n+Number(i.returnedQty||0),0);
+      if(total > 0 && returned >= total) return 'returned';
+      if(returned > 0) return 'partial';
+      if(record.dueDate && record.dueDate < todayISO()) return 'overdue';
+      return 'out';
+    }
+    function statusLabel(status){ return ({out:'Currently out', partial:'Partially returned', overdue:'Overdue', returned:'Returned'})[status] || status; }
+    function statusClass(status){ return ({out:'status-out',partial:'status-partial',overdue:'status-overdue',returned:'status-returned'})[status] || ''; }
+    function outQty(record){ return record.items.reduce((sum,item)=>sum + Math.max(0,Number(item.qty||0)-Number(item.returnedQty||0)),0); }
+
+    function refreshStats(){
+      const stats = records.reduce((acc, r)=>{
+        const status = getStatus(r);
+        if(status !== 'returned') acc.active++;
+        if(status === 'returned') acc.returned++;
+        if(status === 'overdue') acc.overdue++;
+        acc.itemsOut += outQty(r);
+        return acc;
+      },{active:0,returned:0,overdue:0,itemsOut:0});
+      $('#statActive').textContent = stats.active;
+      $('#statItemsOut').textContent = stats.itemsOut;
+      $('#statOverdue').textContent = stats.overdue;
+      $('#statReturned').textContent = stats.returned;
+    }
+
+    function getFilteredRecords(){
+      const search = $('#searchInput').value.trim().toLowerCase();
+      const statusFilter = $('#statusFilter').value;
+      const sort = $('#sortSelect').value;
+      let list = records.filter(record => {
+        const haystack = [record.eventName,record.location,record.borrower,record.borrowerContact,record.notes,...record.items.map(i=>i.name)].join(' ').toLowerCase();
+        const status = getStatus(record);
+        return (!search || haystack.includes(search)) && (statusFilter === 'all' || status === statusFilter);
+      });
+      list.sort((a,b)=>{
+        if(sort==='event') return a.eventName.localeCompare(b.eventName);
+        if(sort==='due') return (a.dueDate || '9999-12-31').localeCompare(b.dueDate || '9999-12-31');
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      return list;
+    }
+
+    function renderRecords(){
+      refreshStats();
+      const area = $('#recordsArea');
+      const list = getFilteredRecords();
+      if(!list.length){
+        const noData = records.length === 0;
+        area.innerHTML = `<div class="empty">
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M7 7h10l1 13H6L7 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></div>
+          <h3>${noData ? 'Wala pang record.' : 'No matching records.'}</h3>
+          <p>${noData ? 'Add the first borrowed item before your event starts, para malinaw kung kanino napunta ang gamit.' : 'Try changing your search or filter.'}</p>
+          ${noData ? '<button class="primary-btn" id="emptyAddBtn">+ Add first record</button>' : '<button class="ghost-btn" id="resetSearchBtn">Reset filters</button>'}
+        </div>`;
+        $('#emptyAddBtn')?.addEventListener('click', openForm);
+        $('#resetSearchBtn')?.addEventListener('click', clearFilters);
+        return;
+      }
+      area.innerHTML = `<div class="record-grid">${list.map(recordCard).join('')}</div>`;
+      $$('.view-record').forEach(btn => btn.addEventListener('click', () => openDetails(btn.dataset.id)));
+      $$('.quick-return').forEach(btn => btn.addEventListener('click', () => openDetails(btn.dataset.id, true)));
+    }
+
+    function recordCard(record){
+      const status = getStatus(record);
+      const chips = record.items.slice(0,3).map(i=>`<span class="item-chip">${safe(i.name)} × ${i.qty}</span>`).join('');
+      const more = record.items.length > 3 ? `<span class="item-chip">+${record.items.length-3} more</span>` : '';
+      const dueDisplay = record.dueDate ? `Return: ${normalizeDate(record.dueDate)}` : 'No return date set';
+      const footerBtn = status !== 'returned' ? `<button class="soft-btn small-btn quick-return" data-id="${record.id}">Update return</button>` : `<button class="soft-btn small-btn view-record" data-id="${record.id}">View details</button>`;
+      return `<article class="record-card">
+        <div class="record-head">
+          <div>
+            <h3 class="record-event">${safe(record.eventName)}</h3>
+            <div class="record-id">${safe(record.id)}</div>
+          </div>
+          <span class="status-pill ${statusClass(status)}">${statusLabel(status)}</span>
+        </div>
+        <div class="record-meta">
+          <div><div class="meta-label">Borrowed by</div><div class="meta-value">${safe(record.borrower)}</div></div>
+          <div><div class="meta-label">Venue</div><div class="meta-value">${safe(record.location || '—')}</div></div>
+          <div><div class="meta-label">Date out</div><div class="meta-value">${normalizeDate(record.dateBorrowed)}</div></div>
+          <div><div class="meta-label">Still out</div><div class="meta-value">${outQty(record)} item${outQty(record)===1?'':'s'}</div></div>
+        </div>
+        <div class="items-preview">
+          <div class="items-top"><span class="items-label">Items borrowed</span><span class="muted" style="font-size:11px;font-weight:700">${record.items.length} line${record.items.length===1?'':'s'}</span></div>
+          <div class="item-chips">${chips}${more}</div>
+        </div>
+        <div class="record-footer">
+          <span class="due-text">${safe(dueDisplay)}</span>
+          <div class="record-actions">
+            <button class="ghost-btn small-btn view-record" data-id="${record.id}">View</button>
+            ${footerBtn}
+          </div>
+        </div>
+      </article>`;
+    }
+
+    function openModal(id){ $('#'+id).classList.add('open'); document.body.style.overflow='hidden'; }
+    function closeModal(id){ $('#'+id).classList.remove('open'); if(!$('.modal-backdrop.open')) document.body.style.overflow=''; }
+    function showToast(message){
+      const toast = $('#toast'); toast.textContent = message; toast.classList.add('show');
+      clearTimeout(toastTimer); toastTimer = setTimeout(()=>toast.classList.remove('show'),2500);
+    }
+
+    function addItemRow(item={name:'',qty:1,condition:''}){
+      const row = document.createElement('div'); row.className='item-row';
+      row.innerHTML = `
+        <div class="field"><label>Item name</label><input class="item-name" placeholder="e.g. Ring light" value="${safe(item.name)}" required></div>
+        <div class="field"><label>Qty</label><input class="item-qty" type="number" min="1" step="1" value="${Number(item.qty)||1}" required></div>
+        <div class="field condition-field"><label>Condition out</label><input class="item-condition" placeholder="Good / with case" value="${safe(item.condition||'')}"></div>
+        <button type="button" class="remove-item" title="Remove item" aria-label="Remove item"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M8 6v-2h8v2M9 10v6M15 10v6M6 6l1 14h10l1-14"/></svg></button>`;
+      $('.remove-item', row).addEventListener('click', ()=>{
+        if($$('.item-row','#itemRows').length === 1){ showToast('At least one item is required.'); return; }
+        row.remove();
+      });
+      $('#itemRows').appendChild(row);
+    }
+
+    function resetForm(){
+      $('#recordForm').reset();
+      $('#dateBorrowed').value = todayISO();
+      $('#itemRows').innerHTML='';
+      addItemRow();
+    }
+    function openForm(){ resetForm(); openModal('formModal'); $('#eventName').focus(); }
+
+    function openDetails(id, focusReturn=false){
+      const record = records.find(r=>r.id===id); if(!record) return;
+      activeRecordId = id;
+      const status = getStatus(record);
+      const itemRows = record.items.map((item,index)=>{
+        const remaining = Math.max(0,Number(item.qty)-Number(item.returnedQty||0));
+        return `<div class="return-row">
+          <div><div class="return-item-name">${safe(item.name)}</div><div class="return-item-sub">Out: ${item.qty} · Returned: ${item.returnedQty||0}${item.condition ? ` · ${safe(item.condition)}`:''}</div></div>
+          <input class="return-qty" data-index="${index}" type="number" min="0" max="${remaining}" value="0" aria-label="Quantity returning for ${safe(item.name)}" />
+        </div>`;
+      }).join('');
+      $('#detailContent').innerHTML = `
+        <div class="detail-heading">
+          <div><h3>${safe(record.eventName)}</h3><div class="detail-sub">${safe(record.id)} · Borrowed ${normalizeDate(record.dateBorrowed)}</div></div>
+          <span class="status-pill ${statusClass(status)}">${statusLabel(status)}</span>
+        </div>
+        <div class="detail-info">
+          <div class="info-box"><div class="meta-label">Borrowed by</div><div class="meta-value">${safe(record.borrower)}</div></div>
+          <div class="info-box"><div class="meta-label">Contact</div><div class="meta-value">${safe(record.borrowerContact || '—')}</div></div>
+          <div class="info-box"><div class="meta-label">Venue</div><div class="meta-value">${safe(record.location || '—')}</div></div>
+          <div class="info-box"><div class="meta-label">Expected return</div><div class="meta-value">${record.dueDate ? normalizeDate(record.dueDate) : 'Not set'}</div></div>
+        </div>
+        <div class="section-label"><h3>Return items</h3><span>${outQty(record)} item${outQty(record)===1?'':'s'} still out</span></div>
+        <div class="return-list">${itemRows}</div>
+        ${record.notes ? `<div class="notes-box"><strong>Notes</strong>${safe(record.notes).replace(/\n/g,'<br>')}</div>` : ''}
+        <div class="detail-actions">
+          ${status !== 'returned' ? '<button class="primary-btn" id="saveReturnBtn">Save returned quantities</button><button class="soft-btn" id="markAllBtn">Mark all as returned</button>' : '<button class="soft-btn" id="reopenBtn">Reopen record</button>'}
+        </div>
+        <div class="danger-zone"><button class="danger-btn small-btn" id="deleteRecordBtn">Delete record</button></div>`;
+      $('#saveReturnBtn')?.addEventListener('click', saveReturnUpdates);
+      $('#markAllBtn')?.addEventListener('click', markAllReturned);
+      $('#reopenBtn')?.addEventListener('click', reopenRecord);
+      $('#deleteRecordBtn')?.addEventListener('click', deleteRecord);
+      openModal('detailModal');
+      if(focusReturn) setTimeout(()=>$('.return-qty')?.focus(),250);
+    }
+
+    function saveReturnUpdates(){
+      const record = records.find(r=>r.id===activeRecordId); if(!record) return;
+      let changed = false;
+      $$('.return-qty','#detailContent').forEach(input=>{
+        const index = Number(input.dataset.index); const item = record.items[index];
+        const remaining = Math.max(0,Number(item.qty)-Number(item.returnedQty||0));
+        const adding = Math.max(0,Math.min(remaining,Number(input.value)||0));
+        if(adding > 0){ item.returnedQty = Number(item.returnedQty||0)+adding; changed=true; }
+      });
+      if(!changed){ showToast('Enter the quantity being returned first.'); return; }
+      saveRecords(); renderRecords(); openDetails(record.id); showToast('Return status updated.');
+    }
+    function markAllReturned(){
+      const record = records.find(r=>r.id===activeRecordId); if(!record) return;
+      record.items.forEach(item=>item.returnedQty=Number(item.qty));
+      saveRecords(); renderRecords(); openDetails(record.id); showToast('All items marked as returned.');
+    }
+    function reopenRecord(){
+      const record = records.find(r=>r.id===activeRecordId); if(!record) return;
+      record.items.forEach(item=>item.returnedQty=0);
+      saveRecords(); renderRecords(); openDetails(record.id); showToast('Record reopened.');
+    }
+    function deleteRecord(){
+      const record = records.find(r=>r.id===activeRecordId); if(!record) return;
+      if(!confirm(`Delete this record for “${record.eventName}”?`)) return;
+      records = records.filter(r=>r.id!==activeRecordId); saveRecords(); closeModal('detailModal'); renderRecords(); showToast('Record deleted.');
+    }
+
+    function clearFilters(){ $('#searchInput').value=''; $('#statusFilter').value='all'; $('#sortSelect').value='newest'; renderRecords(); }
+
+    function exportCSV(){
+      if(!records.length){ showToast('No records to export yet.'); return; }
+      const header = ['Record ID','Event / Project','Venue','Borrowed By','Contact','Date Borrowed','Expected Return','Status','Item','Qty Borrowed','Qty Returned','Qty Still Out','Condition','Notes'];
+      const rows = [];
+      records.forEach(r=>r.items.forEach(i=>rows.push([
+        r.id,r.eventName,r.location||'',r.borrower,r.borrowerContact||'',r.dateBorrowed,r.dueDate||'',statusLabel(getStatus(r)),i.name,i.qty,i.returnedQty||0,Math.max(0,Number(i.qty)-Number(i.returnedQty||0)),i.condition||'',r.notes||''
+      ])));
+      const csv = [header,...rows].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob(["\uFEFF"+csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob); const a=document.createElement('a');
+      a.href=url; a.download=`Borrowed_Returned_Items_${todayISO()}.csv`; a.click(); URL.revokeObjectURL(url);
+      showToast('CSV report downloaded.');
+    }
+
+    $('#openAddHero').addEventListener('click', openForm);
+    $('#openAddFab').addEventListener('click', openForm);
+    $('#addItemBtn').addEventListener('click', ()=>addItemRow());
+    $('#exportBtn').addEventListener('click', exportCSV);
+    $('#clearFiltersBtn').addEventListener('click', clearFilters);
+    $('#searchInput').addEventListener('input', renderRecords);
+    $('#statusFilter').addEventListener('change', renderRecords);
+    $('#sortSelect').addEventListener('change', renderRecords);
+    $$('[data-close]').forEach(btn=>btn.addEventListener('click', ()=>closeModal(btn.dataset.close)));
+    $$('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click', e=>{if(e.target===backdrop) closeModal(backdrop.id)}));
+    document.addEventListener('keydown', e=>{if(e.key==='Escape') $$('.modal-backdrop.open').forEach(m=>closeModal(m.id));});
+
+    $('#recordForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const items = $$('.item-row','#itemRows').map(row=>({
+        name:$('.item-name',row).value.trim(),
+        qty:Number($('.item-qty',row).value)||0,
+        returnedQty:0,
+        condition:$('.item-condition',row)?.value.trim()||''
+      })).filter(i=>i.name && i.qty>0);
+      if(!items.length){ showToast('Add at least one valid item.'); return; }
+      const record = {
+        id:uid(), eventName:$('#eventName').value.trim(),location:$('#location').value.trim(),
+        borrower:$('#borrower').value.trim(),borrowerContact:$('#borrowerContact').value.trim(),
+        dateBorrowed:$('#dateBorrowed').value,dueDate:$('#dueDate').value,notes:$('#notes').value.trim(),items,
+        createdAt:new Date().toISOString()
+      };
+      records.unshift(record); saveRecords(); closeModal('formModal'); renderRecords(); showToast('Borrowed items saved.');
+    });
+
+    loadRecords();
+    $('#dateBorrowed').value = todayISO();
+    renderRecords();
+  </script>
+</body>
+</html>
