@@ -170,6 +170,43 @@
     .return-row input:focus{border-color:var(--brand)}
     .notes-box{margin-top:16px;padding:12px;border-radius:13px;background:#FAFAFB;font-size:13px;line-height:1.5;color:#43474D}
     .notes-box strong{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;letter-spacing:.04em}
+    .attachment-upload{border:1.5px dashed #D8B0B5;background:#FFF9FA;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+    .attachment-thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;background:#F3F4F6;flex:none;border:1px solid #F0D7DA}
+    .photo-thumb{border:0;background:transparent;padding:0;display:flex;cursor:pointer;flex:none;border-radius:10px;overflow:hidden}
+    .photo-thumb:focus-visible{outline:3px solid rgba(181,32,44,.24)}
+    .attachment-row .photo-thumb{width:38px;height:38px}
+    .attachment-row .photo-thumb .attachment-thumb{width:38px;height:38px;border-radius:9px}
+    .attachment-actions .view-photo-btn{background:var(--brand);color:#fff;border:0}
+    .image-viewer{width:min(700px,calc(100vw - 26px));max-height:calc(100vh - 26px);padding:0;overflow:hidden;background:#11151B}
+    .image-viewer-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;color:#fff;background:#1B2028}
+    .image-viewer-title{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+    .image-viewer .close-x{background:rgba(255,255,255,.14);color:#fff;flex:none}
+    .image-viewer .close-x svg{stroke:#fff}
+    .image-viewer-body{min-height:240px;max-height:calc(100vh - 90px);display:grid;place-items:center;padding:10px}
+    .image-viewer-body img{display:block;max-width:100%;max-height:calc(100vh - 110px);object-fit:contain;border-radius:8px}
+    .image-viewer-empty{color:#fff;font-size:13px;padding:22px;text-align:center}
+    .attachment-upload p{margin:3px 0 0;font-size:11px;line-height:1.45;color:var(--muted)}
+    .attachment-upload input{display:none}
+    .attachment-upload .soft-btn{flex:none}
+    .attachment-preview{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .attachment-preview:empty{display:none}
+    .attachment-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .attachment-icon{width:32px;height:32px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none;font-size:15px;font-weight:800}
+    .attachment-meta{min-width:0;flex:1}
+    .attachment-name{font-size:12px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .attachment-sub{font-size:10px;color:var(--muted);margin-top:3px}
+    .attachment-remove{border:0;width:32px;height:32px;border-radius:9px;background:var(--danger-soft);color:var(--danger);font-size:16px;font-weight:800;flex:none}
+    .attachment-section{margin-top:17px;padding-top:16px;border-top:1px solid var(--line)}
+    .attachment-section .section-label{margin:0 0 10px}
+    .saved-attachments{display:flex;flex-direction:column;gap:9px}
+    .saved-attachment-card{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:13px;background:#fff}
+    .saved-attachment-card img{width:54px;height:54px;border-radius:10px;object-fit:cover;background:#F3F4F6;flex:none}
+    .saved-attachment-card .attachment-icon{width:54px;height:54px;border-radius:10px;font-size:18px}
+    .attachment-actions{display:flex;gap:7px;align-items:center;flex:none}
+    .attachment-actions a,.attachment-actions button{min-height:32px;border-radius:9px;padding:0 9px;font-size:11px;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+    .attachment-actions a{background:var(--brand-soft);color:var(--brand-dark)}
+    .attachment-actions button{border:0;background:var(--danger-soft);color:var(--danger)}
+    .attachment-empty{font-size:12px;color:var(--muted);padding:12px;background:#FAFAFB;border-radius:12px}
     .detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
     .danger-zone{margin-top:20px;padding-top:17px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
 
@@ -201,6 +238,10 @@
       .detail-info{grid-template-columns:1fr 1fr;gap:8px}
       .modal-footer{padding:12px 16px}
       .modal-footer .ghost-btn,.modal-footer .primary-btn{flex:1}
+      .attachment-upload{align-items:flex-start;flex-direction:column}
+      .attachment-upload .soft-btn{width:100%}
+      .saved-attachment-card{align-items:flex-start}
+      .attachment-actions{flex-direction:column;align-items:stretch}
     }
     @media (max-width:390px){
       .brand h1{font-size:16px}.brand p{font-size:11px}
@@ -323,8 +364,8 @@
               <input id="dateBorrowed" name="dateBorrowed" type="date" required />
             </div>
             <div class="field">
-              <label for="dueDate">Expected return</label>
-              <input id="dueDate" name="dueDate" type="date" />
+              <label for="dueDate">Expected return <span class="req">*</span></label>
+              <input id="dueDate" name="dueDate" type="date" required />
             </div>
           </div>
 
@@ -337,6 +378,19 @@
           <div class="field full" style="margin-top:14px">
             <label for="notes">Notes</label>
             <textarea id="notes" name="notes" placeholder="Condition before borrowing, missing accessories, special reminder, etc."></textarea>
+          </div>
+
+          <div class="field full" style="margin-top:14px">
+            <label>Proof photo / attachments <span class="req">*</span></label>
+            <div class="attachment-upload">
+              <div>
+                <strong style="font-size:13px">Add photo proof or reference</strong>
+                <p>Required: at least 1 photo of the item, handover, or borrower. You may add receipts/documents too. Up to 5 files, max 3 MB (3,072 KB) bawat isa. Best format: JPG, PNG, or WEBP.</p>
+              </div>
+              <label class="soft-btn small-btn" for="attachmentInput">+ Add photo / file</label>
+              <input id="attachmentInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" />
+            </div>
+            <div class="attachment-preview" id="attachmentPreview"></div>
           </div>
         </div>
         <div class="modal-footer">
@@ -359,12 +413,34 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="imageViewerModal" role="dialog" aria-modal="true" aria-labelledby="imageViewerTitle">
+    <div class="modal image-viewer" role="document">
+      <div class="image-viewer-header">
+        <div class="image-viewer-title" id="imageViewerTitle">Photo preview</div>
+        <button class="close-x" type="button" data-close="imageViewerModal" aria-label="Close photo preview">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="image-viewer-body" id="imageViewerBody"></div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <script>
     const STORAGE_KEY = 'borrowedReturnedTracker.v1';
+    const ATTACHMENT_DB_NAME = 'borrowedReturnedTrackerAttachments';
+    const ATTACHMENT_STORE = 'attachments';
+    const MAX_ATTACHMENTS = 5;
+    const MAX_ATTACHMENT_SIZE = 3 * 1024 * 1024;
     let records = [];
+    let pendingAttachments = [];
+    let attachmentDbPromise = null;
     let activeRecordId = null;
+    let attachmentCache = new Map();
+    let renderedAttachmentUrls = [];
+    let viewerUrl = null;
+    let viewerRequestToken = 0;
     let toastTimer = null;
     let deleteArmedId = null;
     let deleteConfirmTimer = null;
@@ -378,6 +454,163 @@
     const todayISO = () => new Date().toISOString().slice(0,10);
     const safe = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     const uid = () => `REC-${Date.now().toString().slice(-7)}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;
+    const attachmentId = () => `ATT-${Date.now().toString().slice(-7)}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
+    const formatBytes = (bytes=0) => {
+      if(!bytes) return '0 KB';
+      const units = ['B','KB','MB','GB'];
+      const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      const value = bytes / Math.pow(1024, index);
+      return `${value >= 10 || index === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[index]}`;
+    };
+    const attachmentSymbol = (type='') => type.startsWith('image/') ? '▣' : type.includes('pdf') ? 'PDF' : type.includes('word') || type.includes('document') ? 'DOC' : type.includes('sheet') || type.includes('excel') ? 'XLS' : 'FILE';
+    const isImage = (attachment) => {
+      const type = String(attachment?.type || '');
+      const name = String(attachment?.name || '');
+      return type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|avif|heic|heif)$/i.test(name);
+    };
+    const makeAttachmentUrl = (blob) => {
+      const url = URL.createObjectURL(blob);
+      renderedAttachmentUrls.push(url);
+      return url;
+    };
+    function clearRenderedAttachmentUrls(){
+      renderedAttachmentUrls.forEach(url => URL.revokeObjectURL(url));
+      renderedAttachmentUrls = [];
+    }
+    function blobToDataUrl(blob){
+      return new Promise((resolve, reject) => {
+        if(!blob){ reject(new Error('No photo data found.')); return; }
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = () => reject(reader.error || new Error('Unable to read this photo.'));
+        reader.readAsDataURL(blob);
+      });
+    }
+    async function getImageSource(attachment){
+      if(attachment?.dataUrl) return attachment.dataUrl;
+      if(attachment?.blob){
+        try { return await blobToDataUrl(attachment.blob); }
+        catch(error){ console.warn('Unable to prepare photo preview:', error); }
+      }
+      return '';
+    }
+    async function showImageViewer(attachment){
+      const token = ++viewerRequestToken;
+      const body = $('#imageViewerBody');
+      if(!body) return;
+      if(viewerUrl){ URL.revokeObjectURL(viewerUrl); viewerUrl = null; }
+      $('#imageViewerTitle').textContent = attachment?.name || 'Photo preview';
+      body.innerHTML = '<div class="image-viewer-empty">Loading photo…</div>';
+      openModal('imageViewerModal');
+
+      const source = await getImageSource(attachment);
+      if(token !== viewerRequestToken) return;
+      if(!source){
+        body.innerHTML = '<div class="image-viewer-empty">Hindi ma-preview ang photo. Try attaching it again using JPG, PNG, or WEBP.</div>';
+        return;
+      }
+
+      const image = new Image();
+      image.alt = attachment?.name || 'Attached photo';
+      image.onload = () => {
+        if(token !== viewerRequestToken) return;
+        body.replaceChildren(image);
+      };
+      image.onerror = () => {
+        if(token !== viewerRequestToken) return;
+        body.innerHTML = '<div class="image-viewer-empty">Hindi ma-preview ang photo. Try attaching it again using JPG, PNG, or WEBP.</div>';
+      };
+      image.src = source;
+    }
+    function closeImageViewer(){
+      viewerRequestToken++;
+      closeModal('imageViewerModal');
+      const body = $('#imageViewerBody');
+      if(body) body.innerHTML = '';
+      if(viewerUrl){ URL.revokeObjectURL(viewerUrl); viewerUrl = null; }
+    }
+
+    function openAttachmentDb(){
+      if(attachmentDbPromise) return attachmentDbPromise;
+      attachmentDbPromise = new Promise((resolve, reject) => {
+        if(!('indexedDB' in window)){ reject(new Error('IndexedDB is not supported in this browser.')); return; }
+        const request = indexedDB.open(ATTACHMENT_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          const store = db.createObjectStore(ATTACHMENT_STORE, {keyPath:'id'});
+          store.createIndex('recordId', 'recordId', {unique:false});
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error('Unable to open attachment storage.'));
+      });
+      return attachmentDbPromise;
+    }
+    async function saveAttachments(recordId, files){
+      if(!files?.length) return 0;
+      const db = await openAttachmentDb();
+      // Photos are saved as a data URL. This is more reliable for previews on mobile/file browsers
+      // than reopening a Blob URL after the record has been saved.
+      const data = await Promise.all(files.map(async file => {
+        const image = isImage(file);
+        return {
+          id: attachmentId(),
+          recordId,
+          name:file.name,
+          type:file.type || 'application/octet-stream',
+          size:file.size,
+          blob:image ? null : file,
+          dataUrl:image ? await blobToDataUrl(file) : '',
+          createdAt:new Date().toISOString()
+        };
+      }));
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(ATTACHMENT_STORE, 'readwrite');
+        const store = tx.objectStore(ATTACHMENT_STORE);
+        data.forEach(item => store.put(item));
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error('Unable to save attachment.'));
+        tx.onabort = () => reject(tx.error || new Error('Attachment storage was aborted.'));
+      });
+      return data.length;
+    }
+    async function getAttachments(recordId){
+      try{
+        const db = await openAttachmentDb();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(ATTACHMENT_STORE, 'readonly');
+          const index = tx.objectStore(ATTACHMENT_STORE).index('recordId');
+          const request = index.getAll(recordId);
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error || new Error('Unable to read attachments.'));
+        });
+      } catch(error){
+        console.warn('Unable to read attachments:', error);
+        return [];
+      }
+    }
+    async function deleteAttachmentById(id){
+      const db = await openAttachmentDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(ATTACHMENT_STORE, 'readwrite');
+        tx.objectStore(ATTACHMENT_STORE).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error || new Error('Unable to delete attachment.'));
+      });
+    }
+    async function deleteAttachmentsForRecord(recordId){
+      try{
+        const attachments = await getAttachments(recordId);
+        if(!attachments.length) return;
+        const db = await openAttachmentDb();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(ATTACHMENT_STORE, 'readwrite');
+          const store = tx.objectStore(ATTACHMENT_STORE);
+          attachments.forEach(item => store.delete(item.id));
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error || new Error('Unable to delete attachments.'));
+        });
+      } catch(error){ console.warn('Unable to delete record attachments:', error); }
+    }
 
     function loadRecords(){
       try {
@@ -491,7 +724,7 @@
           <div><div class="meta-label">Still out</div><div class="meta-value">${outQty(record)} item${outQty(record)===1?'':'s'}</div></div>
         </div>
         <div class="items-preview">
-          <div class="items-top"><span class="items-label">Items borrowed</span><span class="muted" style="font-size:11px;font-weight:700">${record.items.length} line${record.items.length===1?'':'s'}</span></div>
+          <div class="items-top"><span class="items-label">Items borrowed</span><span class="muted" style="font-size:11px;font-weight:700">${record.items.length} line${record.items.length===1?'':'s'}${Number(record.attachmentCount||0) ? ` · ${Number(record.attachmentCount)} file${Number(record.attachmentCount)===1?'':'s'}` : ''}</span></div>
           <div class="item-chips">${chips}${more}</div>
         </div>
         <div class="record-footer">
@@ -505,12 +738,126 @@
     }
 
     function openModal(id){ $('#'+id).classList.add('open'); document.body.style.overflow='hidden'; }
-    function closeModal(id){ $('#'+id).classList.remove('open'); if(!$('.modal-backdrop.open')) document.body.style.overflow=''; }
+    function closeModal(id){
+      $('#'+id).classList.remove('open');
+      if(id === 'detailModal'){ clearRenderedAttachmentUrls(); attachmentCache = new Map(); }
+      if(!$('.modal-backdrop.open')) document.body.style.overflow='';
+    }
     function showToast(message){
       const toast = $('#toast'); toast.textContent = message; toast.classList.add('show');
       clearTimeout(toastTimer); toastTimer = setTimeout(()=>toast.classList.remove('show'),2500);
     }
 
+    function renderAttachmentPreview(){
+      const preview = $('#attachmentPreview');
+      if(!preview) return;
+      const previousUrls = preview.dataset.urls ? preview.dataset.urls.split('|').filter(Boolean) : [];
+      previousUrls.forEach(url => URL.revokeObjectURL(url));
+      const localUrls = [];
+      preview.innerHTML = pendingAttachments.map((file, index) => {
+        const image = isImage(file);
+        const url = image ? URL.createObjectURL(file) : '';
+        if(url) localUrls.push(url);
+        const visual = image
+          ? `<button type="button" class="photo-thumb" data-pending-view="${index}" aria-label="View ${safe(file.name)}"><img class="attachment-thumb" src="${url}" alt="${safe(file.name)}" /></button>`
+          : `<div class="attachment-icon">${attachmentSymbol(file.type)}</div>`;
+        return `<div class="attachment-row">
+          ${visual}
+          <div class="attachment-meta"><div class="attachment-name">${safe(file.name)}</div><div class="attachment-sub">${formatBytes(file.size)}${image ? ' · Tap photo to preview' : ''}</div></div>
+          <button type="button" class="attachment-remove" data-pending-index="${index}" aria-label="Remove ${safe(file.name)}">×</button>
+        </div>`;
+      }).join('');
+      preview.dataset.urls = localUrls.join('|');
+      $$('[data-pending-index]', preview).forEach(button => button.addEventListener('click', () => {
+        pendingAttachments.splice(Number(button.dataset.pendingIndex), 1);
+        renderAttachmentPreview();
+      }));
+      $$('[data-pending-view]', preview).forEach(button => button.addEventListener('click', () => {
+        const file = pendingAttachments[Number(button.dataset.pendingView)];
+        if(file) showImageViewer({name:file.name, type:file.type, blob:file});
+      }));
+    }
+    function addPendingAttachments(fileList){
+      const files = [...fileList];
+      const remainingSlots = MAX_ATTACHMENTS - pendingAttachments.length;
+      if(remainingSlots <= 0){ showToast(`Maximum of ${MAX_ATTACHMENTS} attachments per record.`); return; }
+      const valid = [];
+      let skippedLarge = 0;
+      files.slice(0, remainingSlots).forEach(file => {
+        if(file.size > MAX_ATTACHMENT_SIZE){ skippedLarge++; return; }
+        valid.push(file);
+      });
+      pendingAttachments.push(...valid);
+      renderAttachmentPreview();
+      if(skippedLarge) showToast(`Skipped ${skippedLarge} file(s): max ${formatBytes(MAX_ATTACHMENT_SIZE)} (3,072 KB) each.`);
+      else if(files.length > remainingSlots) showToast(`Only ${remainingSlots} attachment slot(s) left.`);
+    }
+
+    async function renderSavedAttachments(record){
+      const container = $('#savedAttachments');
+      if(!container) return;
+      clearRenderedAttachmentUrls();
+      attachmentCache = new Map();
+      container.innerHTML = '<div class="attachment-empty">Loading attachments…</div>';
+      const attachments = await getAttachments(record.id);
+      if(!attachments.length){
+        container.innerHTML = '<div class="attachment-empty">No attachments saved for this record.</div>';
+        return;
+      }
+      const preparedAttachments = await Promise.all(attachments.map(async attachment => ({
+        ...attachment,
+        previewSrc: isImage(attachment) ? await getImageSource(attachment) : ''
+      })));
+      preparedAttachments.forEach(attachment => attachmentCache.set(attachment.id, attachment));
+      container.innerHTML = preparedAttachments.map(attachment => {
+        const image = isImage(attachment);
+        const url = image ? attachment.previewSrc : '';
+        const preview = image && url
+          ? `<button type="button" class="photo-thumb" data-attachment-view="${attachment.id}" aria-label="View ${safe(attachment.name)}"><img src="${url}" alt="${safe(attachment.name)}" /></button>`
+          : `<div class="attachment-icon">${attachmentSymbol(attachment.type)}</div>`;
+        const openAction = image
+          ? `<button type="button" class="view-photo-btn" data-attachment-view="${attachment.id}">View photo</button>`
+          : `<button type="button" class="soft-btn" data-attachment-open="${attachment.id}">Open file</button>`;
+        return `<div class="saved-attachment-card">
+          ${preview}
+          <div class="attachment-meta"><div class="attachment-name">${safe(attachment.name)}</div><div class="attachment-sub">${formatBytes(attachment.size)} · Added ${normalizeDate((attachment.createdAt || '').slice(0,10)) || 'today'}${image ? ' · Tap photo to preview' : ''}</div></div>
+          <div class="attachment-actions">
+            ${openAction}
+            <button type="button" data-attachment-delete="${attachment.id}">Remove</button>
+          </div>
+        </div>`;
+      }).join('');
+      $$('[data-attachment-view]', container).forEach(button => button.addEventListener('click', () => {
+        const attachment = attachmentCache.get(button.dataset.attachmentView);
+        if(attachment) showImageViewer(attachment);
+      }));
+      $$('[data-attachment-open]', container).forEach(button => button.addEventListener('click', () => {
+        const attachment = attachmentCache.get(button.dataset.attachmentOpen);
+        const url = attachment?.dataUrl || (attachment?.blob ? URL.createObjectURL(attachment.blob) : '');
+        if(!url) return;
+        const opened = window.open(url, '_blank', 'noopener');
+        if(!opened) showToast('Allow pop-ups to open this file.');
+        if(attachment?.blob && !attachment?.dataUrl) setTimeout(() => URL.revokeObjectURL(url), 30000);
+      }));
+      $$('[data-attachment-delete]', container).forEach(button => button.addEventListener('click', async () => {
+        const id = button.dataset.attachmentDelete;
+        const current = records.find(r => r.id === activeRecordId);
+        if(!current) return;
+        button.disabled = true;
+        try{
+          await deleteAttachmentById(id);
+          current.attachmentCount = Math.max(0, Number(current.attachmentCount || 0) - 1);
+          saveRecords();
+          renderRecords();
+          renderSavedAttachments(current);
+          showToast('Attachment removed.');
+        } catch(error){
+          console.error(error);
+          button.disabled = false;
+          showToast('Hindi na-delete ang attachment. Try again.');
+        }
+      }));
+    }
     function addItemRow(item={name:'',qty:1,condition:''}){
       const row = document.createElement('div'); row.className='item-row';
       row.innerHTML = `
@@ -525,9 +872,25 @@
       $('#itemRows').appendChild(row);
     }
 
+    function syncDueDateMin(){
+      const borrowed = $('#dateBorrowed');
+      const due = $('#dueDate');
+      if(!borrowed || !due) return;
+      due.min = borrowed.value || '';
+      if(due.value && borrowed.value && due.value < borrowed.value) due.value = borrowed.value;
+    }
+
     function resetForm(){
       $('#recordForm').reset();
+      pendingAttachments = [];
+      const attachmentPreview = $('#attachmentPreview');
+      if(attachmentPreview){
+        (attachmentPreview.dataset.urls || '').split('|').filter(Boolean).forEach(url => URL.revokeObjectURL(url));
+        attachmentPreview.dataset.urls = '';
+        attachmentPreview.innerHTML = '';
+      }
       $('#dateBorrowed').value = todayISO();
+      syncDueDateMin();
       $('#itemRows').innerHTML='';
       addItemRow();
     }
@@ -560,6 +923,10 @@
         <div class="section-label"><h3>Return items</h3><span>${outQty(record)} item${outQty(record)===1?'':'s'} still out</span></div>
         <div class="return-list">${itemRows}</div>
         ${record.notes ? `<div class="notes-box"><strong>Notes</strong>${safe(record.notes).replace(/\n/g,'<br>')}</div>` : ''}
+        <div class="attachment-section">
+          <div class="section-label"><h3>Attachments</h3><span>${Number(record.attachmentCount||0)} file${Number(record.attachmentCount||0)===1?'':'s'}</span></div>
+          <div class="saved-attachments" id="savedAttachments"></div>
+        </div>
         <div class="detail-actions">
           ${status !== 'returned' ? '<button class="primary-btn" id="saveReturnBtn">Save returned quantities</button><button class="soft-btn" id="markAllBtn">Mark all as returned</button>' : '<button class="soft-btn" id="reopenBtn">Reopen record</button>'}
         </div>
@@ -568,6 +935,7 @@
       $('#markAllBtn')?.addEventListener('click', markAllReturned);
       $('#reopenBtn')?.addEventListener('click', reopenRecord);
       $('#deleteRecordBtn')?.addEventListener('click', deleteRecord);
+      renderSavedAttachments(record);
       openModal('detailModal');
       if(focusReturn) setTimeout(()=>$('.return-qty')?.focus(),250);
     }
@@ -617,6 +985,7 @@
       const previousRecords = records;
       records = records.filter(r=>r.id!==activeRecordId);
       if(!saveRecords()){ records = previousRecords; return; }
+      deleteAttachmentsForRecord(record.id);
       closeModal('detailModal'); renderRecords(); showToast('Record deleted.');
     }
 
@@ -639,16 +1008,31 @@
     $('#openAddHero').addEventListener('click', openForm);
     $('#openAddFab').addEventListener('click', openForm);
     $('#addItemBtn').addEventListener('click', ()=>addItemRow());
+    $('#attachmentInput').addEventListener('change', event => {
+      addPendingAttachments(event.target.files);
+      event.target.value = '';
+    });
     $('#exportBtn').addEventListener('click', exportCSV);
     $('#clearFiltersBtn').addEventListener('click', clearFilters);
     $('#searchInput').addEventListener('input', renderRecords);
     $('#statusFilter').addEventListener('change', renderRecords);
     $('#sortSelect').addEventListener('change', renderRecords);
-    $$('[data-close]').forEach(btn=>btn.addEventListener('click', ()=>closeModal(btn.dataset.close)));
-    $$('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click', e=>{if(e.target===backdrop) closeModal(backdrop.id)}));
-    document.addEventListener('keydown', e=>{if(e.key==='Escape') $$('.modal-backdrop.open').forEach(m=>closeModal(m.id));});
+    $('#dateBorrowed').addEventListener('change', syncDueDateMin);
+    $$('[data-close]').forEach(btn=>btn.addEventListener('click', ()=>{
+      const id = btn.dataset.close;
+      if(id === 'imageViewerModal') closeImageViewer(); else closeModal(id);
+    }));
+    $$('.modal-backdrop').forEach(backdrop=>backdrop.addEventListener('click', e=>{
+      if(e.target!==backdrop) return;
+      if(backdrop.id === 'imageViewerModal') closeImageViewer(); else closeModal(backdrop.id);
+    }));
+    document.addEventListener('keydown', e=>{
+      if(e.key !== 'Escape') return;
+      if($('#imageViewerModal')?.classList.contains('open')){ closeImageViewer(); return; }
+      $$('.modal-backdrop.open').forEach(m=>closeModal(m.id));
+    });
 
-    $('#recordForm').addEventListener('submit', e=>{
+    $('#recordForm').addEventListener('submit', async e=>{
       e.preventDefault();
       const items = $$('.item-row','#itemRows').map(row=>({
         name:$('.item-name',row).value.trim(),
@@ -657,19 +1041,47 @@
         condition:$('.item-condition',row)?.value.trim()||''
       })).filter(i=>i.name && i.qty>0);
       if(!items.length){ showToast('Add at least one valid item.'); return; }
+      const expectedReturn = $('#dueDate').value;
+      if(!expectedReturn){
+        showToast('Please fill out the Expected return date.');
+        $('#dueDate').focus();
+        return;
+      }
+      if($('#dateBorrowed').value && expectedReturn < $('#dateBorrowed').value){
+        showToast('Expected return cannot be earlier than Date borrowed.');
+        $('#dueDate').focus();
+        return;
+      }
+      const hasPhoto = pendingAttachments.some(file => isImage(file));
+      if(!hasPhoto){
+        showToast('Please attach at least 1 photo proof before saving.');
+        $('#attachmentInput').focus();
+        return;
+      }
       const record = {
         id:uid(), eventName:$('#eventName').value.trim(),location:$('#location').value.trim(),
         borrower:$('#borrower').value.trim(),borrowerContact:$('#borrowerContact').value.trim(),
-        dateBorrowed:$('#dateBorrowed').value,dueDate:$('#dueDate').value,notes:$('#notes').value.trim(),items,
+        dateBorrowed:$('#dateBorrowed').value,dueDate:expectedReturn,notes:$('#notes').value.trim(),items,
+        attachmentCount: pendingAttachments.length,
         createdAt:new Date().toISOString()
       };
       records.unshift(record);
       if(!saveRecords()){ records.shift(); return; }
-      closeModal('formModal'); renderRecords(); showToast('Borrowed items saved.');
+      try{
+        await saveAttachments(record.id, pendingAttachments);
+        closeModal('formModal'); renderRecords(); showToast(pendingAttachments.length ? 'Record and attachments saved.' : 'Borrowed items saved.');
+      } catch(error){
+        console.error('Attachment save failed:', error);
+        record.attachmentCount = 0;
+        saveRecords();
+        closeModal('formModal'); renderRecords();
+        showToast('Record saved, pero hindi na-save ang attachment.');
+      }
     });
 
     loadRecords();
     $('#dateBorrowed').value = todayISO();
+    syncDueDateMin();
     renderRecords();
   </script>
 </body>
