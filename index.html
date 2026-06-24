@@ -234,7 +234,7 @@
       <div class="hero-content">
         <div>
           <h2>Alam agad kung nasaan ang gamit mo.</h2>
-          <p>Track who borrowed each item, which event it belongs to, and what still needs to be returned after setup or egress.</p>
+          <p>Track who borrowed each item, which event it belongs to, and what still needs to be returned after setup or egress. Records are saved on this device and browser.</p>
         </div>
         <button class="primary-btn" id="openAddHero">+ Add borrowed items</button>
       </div>
@@ -366,18 +366,39 @@
     let records = [];
     let activeRecordId = null;
     let toastTimer = null;
+    let deleteArmedId = null;
+    let deleteConfirmTimer = null;
 
-    const $ = (selector, root = document) => root.querySelector(selector);
-    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const resolveRoot = (root = document) => typeof root === 'string' ? document.querySelector(root) : root;
+    const $ = (selector, root = document) => resolveRoot(root)?.querySelector(selector) || null;
+    const $$ = (selector, root = document) => {
+      const target = resolveRoot(root);
+      return target ? [...target.querySelectorAll(selector)] : [];
+    };
     const todayISO = () => new Date().toISOString().slice(0,10);
     const safe = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
     const uid = () => `REC-${Date.now().toString().slice(-7)}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;
 
     function loadRecords(){
-      try { records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-      catch(e){ records = []; }
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        records = stored ? JSON.parse(stored) : [];
+        if(!Array.isArray(records)) records = [];
+      } catch(e){
+        records = [];
+        console.warn('Unable to read saved records:', e);
+      }
     }
-    function saveRecords(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+    function saveRecords(){
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+        return true;
+      } catch(e){
+        console.error('Unable to save records:', e);
+        showToast('Hindi ma-save sa browser. Open the file in Chrome or Safari, not preview mode.');
+        return false;
+      }
+    }
 
     function normalizeDate(date){
       if(!date) return '';
@@ -515,6 +536,8 @@
     function openDetails(id, focusReturn=false){
       const record = records.find(r=>r.id===id); if(!record) return;
       activeRecordId = id;
+      deleteArmedId = null;
+      clearTimeout(deleteConfirmTimer);
       const status = getStatus(record);
       const itemRows = record.items.map((item,index)=>{
         const remaining = Math.max(0,Number(item.qty)-Number(item.returnedQty||0));
@@ -559,22 +582,42 @@
         if(adding > 0){ item.returnedQty = Number(item.returnedQty||0)+adding; changed=true; }
       });
       if(!changed){ showToast('Enter the quantity being returned first.'); return; }
-      saveRecords(); renderRecords(); openDetails(record.id); showToast('Return status updated.');
+      if(!saveRecords()) return; renderRecords(); openDetails(record.id); showToast('Return status updated.');
     }
     function markAllReturned(){
       const record = records.find(r=>r.id===activeRecordId); if(!record) return;
       record.items.forEach(item=>item.returnedQty=Number(item.qty));
-      saveRecords(); renderRecords(); openDetails(record.id); showToast('All items marked as returned.');
+      if(!saveRecords()) return; renderRecords(); openDetails(record.id); showToast('All items marked as returned.');
     }
     function reopenRecord(){
       const record = records.find(r=>r.id===activeRecordId); if(!record) return;
       record.items.forEach(item=>item.returnedQty=0);
-      saveRecords(); renderRecords(); openDetails(record.id); showToast('Record reopened.');
+      if(!saveRecords()) return; renderRecords(); openDetails(record.id); showToast('Record reopened.');
     }
     function deleteRecord(){
       const record = records.find(r=>r.id===activeRecordId); if(!record) return;
-      if(!confirm(`Delete this record for “${record.eventName}”?`)) return;
-      records = records.filter(r=>r.id!==activeRecordId); saveRecords(); closeModal('detailModal'); renderRecords(); showToast('Record deleted.');
+
+      // Two-tap confirmation works more reliably on mobile/file-preview browsers than a native confirm popup.
+      if(deleteArmedId !== activeRecordId){
+        deleteArmedId = activeRecordId;
+        const button = $('#deleteRecordBtn');
+        if(button) button.textContent = 'Tap again to delete';
+        showToast('Tap Delete again within 4 seconds to confirm.');
+        clearTimeout(deleteConfirmTimer);
+        deleteConfirmTimer = setTimeout(()=>{
+          deleteArmedId = null;
+          const btn = $('#deleteRecordBtn');
+          if(btn) btn.textContent = 'Delete record';
+        }, 4000);
+        return;
+      }
+
+      clearTimeout(deleteConfirmTimer);
+      deleteArmedId = null;
+      const previousRecords = records;
+      records = records.filter(r=>r.id!==activeRecordId);
+      if(!saveRecords()){ records = previousRecords; return; }
+      closeModal('detailModal'); renderRecords(); showToast('Record deleted.');
     }
 
     function clearFilters(){ $('#searchInput').value=''; $('#statusFilter').value='all'; $('#sortSelect').value='newest'; renderRecords(); }
@@ -620,7 +663,9 @@
         dateBorrowed:$('#dateBorrowed').value,dueDate:$('#dueDate').value,notes:$('#notes').value.trim(),items,
         createdAt:new Date().toISOString()
       };
-      records.unshift(record); saveRecords(); closeModal('formModal'); renderRecords(); showToast('Borrowed items saved.');
+      records.unshift(record);
+      if(!saveRecords()){ records.shift(); return; }
+      closeModal('formModal'); renderRecords(); showToast('Borrowed items saved.');
     });
 
     loadRecords();
